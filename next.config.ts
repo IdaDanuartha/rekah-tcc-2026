@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Sembunyikan indikator dev on-screen (lingkaran "N" mengambang saat dev)
+  devIndicators: false,
 };
 
 export default nextConfig;

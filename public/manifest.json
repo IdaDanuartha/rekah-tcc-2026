@@ -1,0 +1,45 @@
+{
+  "name": "Rekah",
+  "short_name": "Rekah",
+  "description": "Sistem koordinasi bantuan air bersih kekeringan di Madura. Transparan, teraudit, bisa dipertanggungjawabkan.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E8E2CF",
+  "theme_color": "#5C4430",
+  "orientation": "portrait-primary",
+  "lang": "id",
+  "categories": ["utilities", "government"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x800",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard BPBD",
+      "url": "/dashboard",
+      "description": "Buka dashboard petugas"
+    },
+    {
+      "name": "Transparansi Publik",
+      "url": "/",
+      "description": "Lihat status penanganan desa"
+    }
+  ]
+}
