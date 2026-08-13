@@ -23,10 +23,44 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rekah — Sistem Koordinasi Air Bersih Madura",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://rekah.bpbd.madura.com"
+  ),
+  title: {
+    default: "Rekah — Sistem Koordinasi Bantuan Air Bersih Madura",
+    template: "%s | Rekah",
+  },
   description:
-    "Sistem koordinasi bantuan air bersih kekeringan di Madura. Laporan terstruktur, prioritas berbasis AI, verifikasi terverifikasi.",
-  keywords: ["air bersih", "kekeringan", "Madura", "BPBD", "bantuan", "koordinasi"],
+    "Sistem tanggap kekeringan & koordinasi distribusi air bersih berbasis AI di Madura. Laporan warga terstruktur, prioritas darurat cerdas, serta pelacakan pengiriman transparan BPBD.",
+  keywords: [
+    "air bersih",
+    "kekeringan",
+    "Madura",
+    "BPBD",
+    "bantuan air",
+    "koordinasi bencana",
+    "peta kekeringan",
+    "peta air bersih",
+    "laporan warga",
+    "Pamekasan",
+    "Sampang",
+    "Bangkalan",
+    "Sumenep",
+  ],
+  authors: [{ name: "BPBD & Tim Rekah" }],
+  creator: "Tim Rekah",
+  publisher: "BPBD Madura",
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/images/logo.png" },
+      { url: "/images/logo.png", type: "image/png" },
+    ],
+    shortcut: "/images/logo.png",
+    apple: [{ url: "/images/logo.png", sizes: "180x180", type: "image/png" }],
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -34,11 +68,38 @@ export const metadata: Metadata = {
     title: "Rekah",
   },
   openGraph: {
-    title: "Rekah — Koordinasi Air Bersih Madura",
+    title: "Rekah — Sistem Koordinasi Bantuan Air Bersih Madura",
     description:
-      "Dari laporan kekeringan ke pengiriman air yang terverifikasi. Transparan, teraudit, bisa dipertanggungjawabkan.",
+      "Dari laporan kekeringan warga hingga pengiriman tangki air yang terverifikasi. Transparan, teraudit, dan bisa dipertanggungjawabkan.",
+    url: "/",
+    siteName: "Rekah Madura",
     locale: "id_ID",
     type: "website",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Logo Rekah — Sistem Koordinasi Air Bersih Madura",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rekah — Sistem Koordinasi Bantuan Air Bersih Madura",
+    description:
+      "Platform tanggap darurat kekeringan Madura berbasis AI & transparansi pengiriman air bersih.",
+    images: ["/images/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 

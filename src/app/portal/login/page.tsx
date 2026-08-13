@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import LogoMark from "@/components/ui/LogoMark";
 import {
   MessageCircle,
   ArrowRight,
@@ -220,13 +221,4 @@ const inputClass =
 const btnPrimary =
   "w-full flex items-center justify-center gap-2 bg-[var(--color-tanah-pecah)] !text-white font-medium text-sm py-2.5 rounded-md hover:bg-[var(--color-air-jernih)] disabled:opacity-60 transition-colors shadow-sm";
 
-function LogoMark({ size = 28 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 28 28" fill="none" aria-hidden="true" className="shrink-0">
-      <rect width="28" height="28" rx="7" fill="var(--color-tanah-pecah)" />
-      <path d="M6 14 L11 12 L16 15 L21 13" stroke="#4FB3CE" strokeWidth="2" strokeLinecap="round" />
-      <path d="M11 12 L10 7" stroke="#C79A6E" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M16 15 L17 20" stroke="#C79A6E" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
+

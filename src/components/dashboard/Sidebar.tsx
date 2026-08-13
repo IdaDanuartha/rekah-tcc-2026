@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LogoMark from "@/components/ui/LogoMark";
 import {
   LayoutDashboard,
   MessageCircle,
@@ -61,24 +62,7 @@ function buildNavSections(pendingCount: number): NavSection[] {
   ];
 }
 
-function LogoMark({ size = 32 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 28 28"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0"
-      aria-hidden="true"
-    >
-      <rect width="28" height="28" rx="7" fill="var(--color-tanah-pecah)" />
-      <path d="M6 14 L11 12 L16 15 L21 13" stroke="#4FB3CE" strokeWidth="2" strokeLinecap="round" />
-      <path d="M11 12 L10 7" stroke="#C79A6E" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M16 15 L17 20" stroke="#C79A6E" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
+
 
 function NavItem({
   item,

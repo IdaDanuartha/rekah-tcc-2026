@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import LogoMark from "@/components/ui/LogoMark";
 import {
   MapPin,
   Clock,
@@ -1014,24 +1015,7 @@ export default function HomePage() {
 // Brand mark
 // =============================================
 
-function LogoMark({ size = 28 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 28 28"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <rect width="28" height="28" rx="7" fill="var(--color-tanah-pecah)" />
-      <path d="M6 14 L11 12 L16 15 L21 13" stroke="#79AEBC" strokeWidth="2" strokeLinecap="round" />
-      <path d="M11 12 L10 7" stroke="#9A978C" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M16 15 L17 20" stroke="#9A978C" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
+
 
 // Wadah ikon berbeda per sumber data — bukan rounded-square seragam.
 

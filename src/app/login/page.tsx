@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import LogoMark from "@/components/ui/LogoMark";
 import {
   Lock,
   Mail,
@@ -79,24 +80,7 @@ export default function LoginPage() {
         {/* Brand header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-3">
-            <svg
-              width="36"
-              height="36"
-              viewBox="0 0 28 28"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="shrink-0"
-            >
-              <rect width="28" height="28" rx="7" fill="var(--color-tanah-pecah)" />
-              <path
-                d="M6 14 L11 12 L16 15 L21 13"
-                stroke="#4FB3CE"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path d="M11 12 L10 7" stroke="#C79A6E" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M16 15 L17 20" stroke="#C79A6E" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+            <LogoMark size={36} />
             <span
               className="text-2xl font-semibold text-[var(--color-tanah-pecah)] tracking-tight"
               style={{ fontFamily: "var(--font-heading)" }}
