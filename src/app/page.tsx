@@ -923,16 +923,18 @@ export default function HomePage() {
             <div>
               <div className="mono-label mb-3">Navigasi</div>
               <ul className="space-y-2">
-                {navLinks.map((l) => (
-                  <li key={l.href}>
-                    <a
-                      href={l.href}
-                      className="text-sm text-[var(--color-lempung)] hover:text-[var(--color-air-jernih)] transition-colors"
-                    >
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
+                {navLinks
+                  .filter((l) => l.href !== "#beranda" && l.href !== "#kontak")
+                  .map((l) => (
+                    <li key={l.href}>
+                      <a
+                        href={l.href}
+                        className="text-sm text-[var(--color-lempung)] hover:text-[var(--color-air-jernih)] transition-colors"
+                      >
+                        {l.label}
+                      </a>
+                    </li>
+                  ))}
                 <li>
                   <a
                     href="/portal"
@@ -979,10 +981,18 @@ export default function HomePage() {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-12 pt-6 border-t border-[var(--color-kapur-garis)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <p className="text-xs text-[var(--color-lempung)]">
-              © 2026 Rekah. Prototipe kompetisi TCC Vibe Code 2026.
-            </p>
+          <div className="mt-12 pt-6 border-t border-[var(--color-kapur-garis)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/logo_tcc.png"
+                alt="Logo TCC Vibe Code 2026"
+                className="h-10 w-auto shrink-0"
+              />
+              <p className="text-xs text-[var(--color-lempung)]">
+                © 2026 Rekah. Prototipe kompetisi<br className="hidden sm:block" /> TCC Vibe Code 2026.
+              </p>
+            </div>
             <p className="mono-label normal-case tracking-normal">
               Bukan aplikasi resmi BPBD Sampang / Bangkalan.
             </p>

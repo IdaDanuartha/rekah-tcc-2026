@@ -1,5 +1,11 @@
 # Rekah — Platform Koordinasi Darurat Air Bersih BPBD Madura
 
+<p align="center">
+  <img src="public/images/logo_tcc.png" alt="TCC Vibe Code 2026" height="72" />
+</p>
+
+<p align="center"><sub>Prototipe untuk <b>TCC Vibe Code 2026</b>.</sub></p>
+
 Rekah adalah platform tanggap kekeringan yang menghubungkan **laporan warga (via WhatsApp)**, **prioritisasi berbasis AI**, dan **pelacakan pengiriman air (dropping) secara realtime** dalam satu alur akuntabel — dari laporan masuk sampai bukti air diterima warga.
 
 Dibangun untuk konteks nyata krisis air Madura 2026: **94 desa di Sampang** berpotensi kekeringan (12 kecamatan kritis), **27 desa di Bangkalan** terancam, serta siaga darurat di Sumenep (lihat [Sumber Data](#sumber-data)).
