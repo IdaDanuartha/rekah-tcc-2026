@@ -249,8 +249,33 @@ export default function DriverTracker({
     setProofOpen(false);
   }
 
-  function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null;
+  // Kompres foto di HP sebelum upload: kamera HP bisa 5-12MB → lampaui batas
+  // body Server Action & bikin upload lambat. Skala ke maks 1600px, JPEG 0.8.
+  async function compressImage(file: File): Promise<File> {
+    if (!file.type.startsWith("image/")) return file;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const MAX = 1600;
+      const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+      const w = Math.round(bitmap.width * scale);
+      const h = Math.round(bitmap.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return file;
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.8));
+      if (!blob) return file;
+      return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+    } catch {
+      return file; // gagal kompres → pakai asli, biar tetap bisa kirim
+    }
+  }
+
+  async function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.files?.[0] ?? null;
+    const f = raw ? await compressImage(raw) : null;
     setPhoto(f);
     if (preview) URL.revokeObjectURL(preview);
     setPreview(f ? URL.createObjectURL(f) : null);
