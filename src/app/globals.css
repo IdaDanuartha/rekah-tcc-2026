@@ -148,12 +148,11 @@ pre,
    Utility — editorial building blocks
    ============================================= */
 
-/* Micro-label: mono, uppercase, tracked — jejak "ledger" */
+/* Micro-label: mono, tracked halus — jejak "ledger" tanpa ALL CAPS */
 .mono-label {
   font-family: var(--font-data);
   font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--color-lempung);
   font-weight: 500;
 }

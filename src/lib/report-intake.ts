@@ -27,6 +27,20 @@ const PRICE_RE = /(rp\s*\d|\d[\d.,]*\s*(rb|ribu|rbu|k|jt|juta|rupiah|perak))/i;
 const BARE_PRICE_RE = /^\s*(?:sekitar\s*|kira-?kira\s*|kurang lebih\s*)?rp?\.?\s*\d[\d.,]*\s*$/i;
 const SKIP_RE = /^(lewati|lewat|skip|no|-|lupa|tidak tahu|tidak|nggak tau|gak tau|ga tau|engga|enggak|nggak|gak|ga)\b[\s.!,]*$/i;
 
+// Fallback deterministik harga air dari teks bila AI tak mengekstraknya.
+// "125rb"/"125 ribu" → 125000, "1,5jt"/"2 juta" → juta, "rp 200.000" → 200000.
+function parseHargaAir(text: string): number | null {
+  const t = text.toLowerCase();
+  const num = (s: string) => parseFloat(s.replace(/\.(?=\d{3}\b)/g, "").replace(",", "."));
+  let m = t.match(/(\d[\d.,]*)\s*(jt|juta)\b/);
+  if (m) { const n = num(m[1]); if (!isNaN(n)) return Math.round(n * 1_000_000); }
+  m = t.match(/(\d[\d.,]*)\s*(rb|ribu|rbu)\b/);
+  if (m) { const n = num(m[1]); if (!isNaN(n)) return Math.round(n * 1_000); }
+  m = t.match(/rp\.?\s*(\d[\d.,]*)/);
+  if (m) { const n = parseInt(m[1].replace(/[.,]/g, ""), 10); if (!isNaN(n) && n >= 1000) return n; }
+  return null;
+}
+
 export interface Extraction {
   is_laporan_kekeringan?: boolean;
   desa?: string | null;
@@ -199,7 +213,7 @@ export async function processIncomingReport({
   const finalDurasi = extraction.durasi_hari ?? prev?.duration_days ?? null;
   // Harga air mandiri: sinyal urgensi opsional. Pertahankan nilai lama bila
   // pesan lanjutan tak menyebut harga.
-  const hargaAir = extraction.harga_air_per_tangki ?? prev?.water_price ?? null;
+  const hargaAir = extraction.harga_air_per_tangki ?? parseHargaAir(text) ?? prev?.water_price ?? null;
   const matchedVillage = villages.find((v) => v.id === finalVillageId) ?? null;
   const desaName = matchedVillage?.name ?? extraction.desa ?? null;
 

@@ -38,6 +38,7 @@ Aturan:
 - Jika confidence < 0.7, set butuh_klarifikasi = true dan isi pertanyaan_klarifikasi
 - indikator_urgensi berisi frasa kunci dari laporan (max 5 item)
 - confidence mencerminkan seberapa yakin kamu dengan hasil ekstraksi
+- harga_air_per_tangki = harga beli air mandiri per tangki/rit jika disebut. Konversi notasi uang ke rupiah penuh: "rb"/"ribu" = ×1000, "jt"/"juta" = ×1000000, "k" = ×1000. Contoh: "125rb" → 125000, "250 ribu" → 250000, "1,5jt" → 1500000, "rp 200.000" → 200000
 - Jangan mengarang data yang tidak ada di laporan`;
 
 export async function POST(request: NextRequest) {

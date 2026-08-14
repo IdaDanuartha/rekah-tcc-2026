@@ -1,7 +1,8 @@
-import { ArrowLeft, MapPin, Droplets, CheckCircle2, Clock, FileText, Truck, MessageCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Droplets, CheckCircle2, Clock, FileText, Truck, MessageCircle, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CrackPattern from "@/components/ui/CrackPattern";
+import ProofPhoto from "@/components/ui/ProofPhoto";
 import { getVillage } from "@/lib/dashboard-data";
 import { parsePhones } from "@/lib/reporter-session";
 import type { DropStatus } from "@/lib/types";
@@ -134,16 +135,19 @@ export default async function VillageDetailPage({ params }: PageProps<"/dashboar
             village.schedules.map((s) => {
               const isDone = s.status === "done";
               return (
-                <div key={s.id} className="px-5 py-3.5 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-md flex items-center justify-center ${isDone ? "bg-[var(--color-hijau-muda)]" : "bg-[var(--color-air-muda)]"}`}>
+                <div key={s.id} className="px-5 py-3.5 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 ${isDone ? "bg-[var(--color-hijau-muda)]" : "bg-[var(--color-air-muda)]"}`}>
                       {isDone ? (
                         <CheckCircle2 size={16} className="text-[var(--color-hijau-tuntas)]" />
                       ) : (
                         <Clock size={16} className="text-[var(--color-air-jernih)]" />
                       )}
                     </div>
-                    <div>
+                    {s.delivery_proofs?.[0]?.photo_url && (
+                      <ProofPhoto url={s.delivery_proofs[0].photo_url!} size="sm" />
+                    )}
+                    <div className="min-w-0">
                       <div className="text-sm font-medium text-[var(--color-tanah-pecah)]">
                         {s.fleet}
                         {s.delivery_proofs?.[0] && (
@@ -154,13 +158,13 @@ export default async function VillageDetailPage({ params }: PageProps<"/dashboar
                         {new Date(s.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                       </div>
                       {s.delivery_proofs?.[0]?.nfc_tag_id && (
-                        <div className="mono-label normal-case tracking-normal mt-0.5 text-[var(--color-air-jernih)]">
-                          NFC {s.delivery_proofs[0].nfc_tag_id}
+                        <div className="mono-label normal-case tracking-normal mt-0.5 text-[var(--color-air-jernih)] flex items-center gap-1">
+                          <ShieldCheck size={11} className="shrink-0" /> Titik terverifikasi NFC
                         </div>
                       )}
                     </div>
                   </div>
-                  <span className={`mono-label !text-[0.625rem] px-2 py-1 rounded-full border ${isDone ? "text-[var(--color-hijau-tuntas)] border-[#86C7A2] bg-[var(--color-hijau-muda)]" : "text-[var(--color-air-jernih)] border-[#9ECADC] bg-[var(--color-air-muda)]"}`}>
+                  <span className={`mono-label !text-[0.625rem] px-2 py-1 rounded-full border shrink-0 ${isDone ? "text-[var(--color-hijau-tuntas)] border-[#86C7A2] bg-[var(--color-hijau-muda)]" : "text-[var(--color-air-jernih)] border-[#9ECADC] bg-[var(--color-air-muda)]"}`}>
                     {dropLabel[s.status]}
                   </span>
                 </div>

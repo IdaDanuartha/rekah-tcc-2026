@@ -8,13 +8,18 @@ import {
   ShieldAlert,
   AlertTriangle,
   FileText,
+  Camera,
+  CheckCircle2,
 } from "lucide-react";
 import StatusBadge, { VerifBadge } from "@/components/ui/StatusBadge";
 import PriorityIndicator from "@/components/ui/PriorityIndicator";
 import CrackPattern from "@/components/ui/CrackPattern";
+import ProofPhoto from "@/components/ui/ProofPhoto";
+import GeotagLink from "@/components/ui/GeotagLink";
 import ReportActions from "@/components/dashboard/ReportActions";
 import RescoreButton from "@/components/dashboard/RescoreButton";
 import { getReport } from "@/lib/dashboard-data";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { ReportStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +47,27 @@ export default async function ReportDetailPage({
   const village = report.villages;
   const score = report.priority_scores?.[0];
   const verified = report.phoneVerified;
+
+  // Bukti serah terima desa ini (foto + geotag + NFC) — via jadwal dropping.
+  type ProofRow = {
+    verified_at: string;
+    photo_url: string | null;
+    nfc_tag_id: string | null;
+    geotag_lat: number | null;
+    geotag_lng: number | null;
+  };
+  let proof: ProofRow | null = null;
+  if (report.village_id) {
+    const supabase = createAdminClient();
+    const { data: js } = await supabase
+      .from("drop_schedules")
+      .select("status, delivery_proofs(verified_at, photo_url, nfc_tag_id, geotag_lat, geotag_lng)")
+      .eq("village_id", report.village_id)
+      .order("date", { ascending: false });
+    const rows = (js as unknown as { status: string; delivery_proofs: ProofRow[] | null }[]) ?? [];
+    const withProof = rows.find((r) => r.delivery_proofs?.[0]);
+    proof = withProof?.delivery_proofs?.[0] ?? null;
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -91,6 +117,18 @@ export default async function ReportDetailPage({
                       ? "✗ Warga: belum diterima"
                       : "Menunggu konfirmasi warga"}
                 </span>
+              )}
+              {report.status === "done" && report.received_ok === false && report.phone && (
+                <a
+                  href={`https://wa.me/${report.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                    `Halo, terkait laporan air bersih${village?.name ? ` di Desa ${village.name}` : ""}. Kami menerima konfirmasi bahwa air belum diterima. Boleh dibantu detailnya agar kami tindak lanjuti?`,
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md bg-[var(--color-hijau-tuntas)] !text-white hover:bg-[#345B48] transition-colors"
+                >
+                  <MessageCircle size={13} /> Follow-up via WhatsApp
+                </a>
               )}
             </div>
           </div>
@@ -179,6 +217,41 @@ export default async function ReportDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Bukti serah terima */}
+      {proof && (
+        <div className="card rounded-lg px-6 py-5">
+          <div className="mono-label flex items-center gap-1.5 mb-4">
+            <Camera size={12} />
+            Bukti Serah Terima
+          </div>
+          <div className="flex flex-col sm:flex-row gap-5">
+            {proof.photo_url ? (
+              <ProofPhoto url={proof.photo_url} />
+            ) : (
+              <div className="h-28 w-full max-w-[12rem] rounded-md border border-dashed border-[var(--color-kapur-garis)] flex items-center justify-center text-xs text-[var(--color-lempung)]">
+                Tanpa foto
+              </div>
+            )}
+            <div className="flex-1 space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-[var(--color-hijau-tuntas)]">
+                <CheckCircle2 size={14} /> Terekam {new Date(proof.verified_at).toLocaleString("id-ID")}
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={14} className={proof.nfc_tag_id ? "text-[var(--color-air-jernih)]" : "text-[var(--color-lempung)]"} />
+                {proof.nfc_tag_id ? (
+                  <>Titik terverifikasi NFC · <span className="font-mono text-[var(--color-tanah-pecah)]">{proof.nfc_tag_id}</span></>
+                ) : (
+                  <span className="text-[var(--color-lempung)]">Tanpa tag NFC</span>
+                )}
+              </div>
+              {proof.geotag_lat != null && proof.geotag_lng != null && (
+                <GeotagLink lat={proof.geotag_lat} lng={proof.geotag_lng} />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Skor prioritas */}
       <div className="card rounded-lg px-6 py-5">

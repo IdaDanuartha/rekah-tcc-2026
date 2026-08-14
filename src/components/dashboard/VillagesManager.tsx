@@ -284,15 +284,20 @@ export default function VillagesManager({ villages }: { villages: VillageListIte
                     <Droplets size={11} className="shrink-0" />
                     {lastDropping(desa.last_dropping_at)}
                   </span>
-                  {desa.activeReports > 0 ? (
-                    <span className="bg-[var(--color-air-muda)] text-[var(--color-air-jernih)] px-2 py-0.5 rounded-full font-medium border border-[#A9C3CC] !text-[0.625rem] uppercase tracking-[0.08em]">
-                      {desa.activeReports} aktif
-                    </span>
-                  ) : (
-                    <Link href={`/dashboard/villages/${desa.id}`} className="text-[var(--color-lempung)] hover:text-[var(--color-air-jernih)] transition-colors">
+                  <div className="flex items-center gap-2">
+                    {desa.activeReports > 0 && (
+                      <span className="bg-[var(--color-air-muda)] text-[var(--color-air-jernih)] px-2 py-0.5 rounded-full font-medium border border-[#A9C3CC] !text-[0.625rem] uppercase tracking-[0.08em]">
+                        {desa.activeReports} aktif
+                      </span>
+                    )}
+                    <Link
+                      href={`/dashboard/villages/${desa.id}`}
+                      aria-label={`Lihat detail ${desa.name}`}
+                      className="text-[var(--color-lempung)] hover:text-[var(--color-air-jernih)] transition-colors"
+                    >
                       <ArrowRight size={14} />
                     </Link>
-                  )}
+                  </div>
                 </div>
               </div>
             );

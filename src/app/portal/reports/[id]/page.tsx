@@ -14,6 +14,7 @@ import StatusBadge, { VerifBadge } from "@/components/ui/StatusBadge";
 import PortalHeader from "@/components/portal/PortalHeader";
 import ReceiptConfirm from "@/components/portal/ReceiptConfirm";
 import TrackPanel from "@/components/tracking/TrackPanel";
+import ProofPhoto from "@/components/ui/ProofPhoto";
 import { requireReporterPhone } from "@/lib/reporter-server";
 import { normalizePhone, parsePhones } from "@/lib/reporter-session";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -244,8 +245,12 @@ export default async function PortalLaporanDetail({
                 {proof.nfc_tag_id && (
                   <div className="flex items-center gap-2 text-xs text-[var(--color-lempung)]">
                     <ShieldCheck size={13} className="text-[var(--color-air-jernih)]" />
-                    Titik terverifikasi NFC ·{" "}
-                    <span className="font-mono text-[var(--color-tanah-pecah)]">{proof.nfc_tag_id}</span>
+                    Titik terverifikasi NFC
+                  </div>
+                )}
+                {proof.photo_url && (
+                  <div className="pt-1">
+                    <ProofPhoto url={proof.photo_url} />
                   </div>
                 )}
               </div>
