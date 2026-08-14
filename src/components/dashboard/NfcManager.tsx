@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Nfc, Loader2, CheckCircle2, Trash2, Tag, MapPin } from "lucide-react";
 import { registerNfcTag, deleteNfcTag, type NfcTag } from "@/lib/nfc-actions";
+import Combobox from "@/components/ui/Combobox";
 
 type VillageOpt = { id: string; name: string; district: string };
 
@@ -20,7 +21,11 @@ export default function NfcManager({
   const [label, setLabel] = useState("");
   const [scanning, setScanning] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [toDelete, setToDelete] = useState<NfcTag | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [comboKey, setComboKey] = useState(0); // remount Combobox utk reset pilihan
   const abortRef = useRef<AbortController | null>(null);
 
   async function scan() {
@@ -80,21 +85,33 @@ export default function NfcManager({
       setMsg({ type: "ok", text: "Stiker terdaftar." });
       setUid("");
       setLabel("");
+      setVillageId("");
+      setComboKey((k) => k + 1);
       router.refresh();
     } else {
       setMsg({ type: "err", text: res.error });
     }
   }
 
-  async function remove(u: string) {
-    await deleteNfcTag(u);
-    router.refresh();
+  async function confirmDelete() {
+    if (!toDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+    const res = await deleteNfcTag(toDelete.uid);
+    setDeleting(false);
+    if (res.ok) {
+      setToDelete(null);
+      router.refresh();
+    } else {
+      setDeleteError(res.error);
+    }
   }
 
   const inputCls =
     "w-full px-3 py-2.5 bg-[var(--color-kertas)] border border-[var(--color-kapur-dalam)] rounded-md text-sm text-[var(--color-tanah-pecah)] placeholder:text-[var(--color-lempung)] focus:outline-none focus:border-[var(--color-air-jernih)] focus:ring-2 focus:ring-[var(--color-air-jernih)]/20 transition-all";
 
   return (
+    <>
     <div className="space-y-6">
       {/* Form register */}
       <div className="card rounded-lg p-5 space-y-4">
@@ -127,14 +144,13 @@ export default function NfcManager({
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
             <label className="mono-label block mb-1.5">Desa tujuan</label>
-            <select value={villageId} onChange={(e) => setVillageId(e.target.value)} className={inputCls}>
-              <option value="">— pilih desa —</option>
-              {villages.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.name} · {v.district}
-                </option>
-              ))}
-            </select>
+            <Combobox
+              key={comboKey}
+              name="village"
+              placeholder="— pilih desa —"
+              onChange={setVillageId}
+              options={villages.map((v) => ({ value: v.id, label: `${v.name} · ${v.district}` }))}
+            />
           </div>
           <div>
             <label className="mono-label block mb-1.5">Label titik (opsional)</label>
@@ -188,7 +204,7 @@ export default function NfcManager({
                   </div>
                 </div>
                 <button
-                  onClick={() => remove(t.uid)}
+                  onClick={() => { setToDelete(t); setDeleteError(null); }}
                   className="p-2 text-[var(--color-lempung)] hover:text-[var(--color-genting)] transition-colors shrink-0"
                   aria-label="Hapus stiker"
                 >
@@ -200,5 +216,49 @@ export default function NfcManager({
         )}
       </div>
     </div>
+
+    {/* Konfirmasi hapus */}
+    {toDelete && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-[var(--color-tanah-pecah)]/40 backdrop-blur-[1px]" onClick={() => !deleting && setToDelete(null)} />
+        <div className="relative card rounded-xl shadow-[var(--shadow-float)] w-full max-w-md p-6 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-md bg-[#F1DDDA] flex items-center justify-center shrink-0">
+              <Trash2 size={18} className="text-[var(--color-genting)]" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-lg font-semibold text-[var(--color-tanah-pecah)]" style={{ fontFamily: "var(--font-heading)" }}>
+                Hapus stiker ini?
+              </h3>
+              <p className="text-sm text-[var(--color-lempung)] mt-1">
+                <span className="font-mono text-[var(--color-tanah-pecah)]">{toDelete.uid}</span> · {toDelete.villageName}
+                {toDelete.label ? ` (${toDelete.label})` : ""}. Sopir tak bisa lagi menyelesaikan dropping dengan tag ini. Tindakan tidak bisa dibatalkan.
+              </p>
+            </div>
+          </div>
+
+          {deleteError && <p className="text-xs text-[var(--color-genting)]">{deleteError}</p>}
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={() => setToDelete(null)}
+              disabled={deleting}
+              className="px-4 py-2.5 text-sm font-medium text-[var(--color-lempung)] hover:text-[var(--color-tanah-pecah)] disabled:opacity-50 transition-colors"
+            >
+              Batal
+            </button>
+            <button
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="inline-flex items-center gap-2 bg-[var(--color-genting)] !text-white text-sm font-medium px-4 py-2.5 rounded-md hover:bg-[#8F2E24] disabled:opacity-60 transition-colors"
+            >
+              {deleting ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+              {deleting ? "Menghapus…" : "Hapus Stiker"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

@@ -16,12 +16,14 @@ export default function Combobox({
   placeholder = "Pilih…",
   defaultValue = "",
   required = false,
+  onChange,
 }: {
   options: ComboOption[];
   name: string;
   placeholder?: string;
   defaultValue?: string;
   required?: boolean;
+  onChange?: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -67,6 +69,7 @@ export default function Combobox({
   function choose(v: string) {
     setValue(v);
     setOpen(false);
+    onChange?.(v);
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
