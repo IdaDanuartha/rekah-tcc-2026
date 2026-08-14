@@ -20,9 +20,9 @@ import type { ReportStatus } from "@/lib/types";
 import type { ReportListItem } from "@/lib/dashboard-data";
 
 const bpbdChip: Record<string, string> = {
-  kritis: "text-[var(--color-genting)] border-[#E0A99C]",
-  langka: "text-[var(--color-siaga)] border-[#E8C089]",
-  terbatas: "text-[var(--color-lempung)] border-[var(--color-kapur-garis)]",
+  kritis: "bg-[#FBD9D3] text-[#C62828] border-[#E8A99C] font-semibold",
+  langka: "bg-[var(--color-kertas-tua)] text-[var(--color-siaga)] border-[#E8C089]",
+  terbatas: "bg-[var(--color-kertas-tua)] text-[var(--color-lempung)] border-[var(--color-kapur-garis)]",
 };
 
 const filterOptions: { value: ReportStatus | "semua" | "eskalasi"; label: string }[] = [
@@ -191,7 +191,7 @@ export default function ReportsBrowser({
                         <ShieldAlert size={14} className="text-[var(--color-siaga)] shrink-0" />
                       )}
                       {category && (
-                        <span className={`mono-label !text-[0.625rem] px-1.5 py-0.5 rounded border bg-[var(--color-kertas-tua)] ${bpbdChip[category]}`}>
+                        <span className={`mono-label !text-[0.625rem] px-1.5 py-0.5 rounded border capitalize ${bpbdChip[category]}`}>
                           {category}
                         </span>
                       )}

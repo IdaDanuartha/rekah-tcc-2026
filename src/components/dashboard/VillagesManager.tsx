@@ -26,9 +26,9 @@ const kategoriConfig: Record<
   BpbdCategory,
   { label: string; accent: string; chip: string; icon: React.ComponentType<{ size?: number; className?: string }> }
 > = {
-  kritis: { label: "Kritis", accent: "var(--color-genting)", chip: "text-[var(--color-genting)] border-[#CD9683]", icon: AlertTriangle },
-  langka: { label: "Langka", accent: "var(--color-siaga)", chip: "text-[var(--color-siaga)] border-[#CBB98A]", icon: Clock },
-  terbatas: { label: "Terbatas", accent: "var(--color-lempung)", chip: "text-[var(--color-lempung)] border-[var(--color-kapur-garis)]", icon: CheckCircle2 },
+  kritis: { label: "Kritis", accent: "var(--color-genting)", chip: "bg-[#FBD9D3] text-[#C62828] border-[#E8A99C] font-semibold", icon: AlertTriangle },
+  langka: { label: "Langka", accent: "var(--color-siaga)", chip: "bg-[var(--color-kertas-tua)] text-[var(--color-siaga)] border-[#CBB98A]", icon: Clock },
+  terbatas: { label: "Terbatas", accent: "var(--color-lempung)", chip: "bg-[var(--color-kertas-tua)] text-[var(--color-lempung)] border-[var(--color-kapur-garis)]", icon: CheckCircle2 },
 };
 
 // Peta hanya di klien (Leaflet butuh window)
@@ -255,7 +255,7 @@ export default function VillagesManager({ villages }: { villages: VillageListIte
                   </Link>
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     {config && (
-                      <span className={`mono-label !text-[0.625rem] px-2 py-0.5 rounded border bg-[var(--color-kertas-tua)] flex items-center gap-1 ${config.chip}`}>
+                      <span className={`mono-label !text-[0.625rem] px-2 py-0.5 rounded border flex items-center gap-1 ${config.chip}`}>
                         <Icon size={10} className="shrink-0" />
                         {config.label}
                       </span>
