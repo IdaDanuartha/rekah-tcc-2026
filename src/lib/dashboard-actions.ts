@@ -354,7 +354,8 @@ export async function updateScheduleStatus(
       status === "in_transit"
         ? `Armada air${namaDesa ? ` untuk Desa ${namaDesa}` : ""} sedang *dalam perjalanan* menuju titik dropping.\n\nLacak status: ${portalLink()}`
         : `Air bersih telah *disalurkan*${namaDesa ? ` ke Desa ${namaDesa}` : ""}.\n\nMohon konfirmasi: apakah air benar-benar sudah *diterima* warga?\nBalas *YA* jika sudah, atau *BELUM* jika belum.\n\nKonfirmasi Anda menjadi bukti akuntabilitas penyaluran. Terima kasih.`;
-    for (const p of phones) await notifWA(p, pesan);
+    // Paralel + best-effort: WA gagal/timeout tak boleh menggagalkan update status.
+    await Promise.allSettled(phones.map((p) => notifWA(p, pesan)));
   }
 
   if (status === "done" && schedule?.village_id) {

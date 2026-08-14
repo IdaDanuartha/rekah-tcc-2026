@@ -22,10 +22,13 @@ export async function kirimWA(
     // Kirim JSON → body tak ter-parse → "invalid/empty body value".
     const body = new URLSearchParams({ target, message });
 
+    // Timeout wajib: tanpa ini, Fonnte lambat/unreachable = fetch hang selamanya
+    // → server action pemanggil (mis. submitDeliveryProof) ikut nyangkut.
     const res = await fetch("https://api.fonnte.com/send", {
       method: "POST",
       headers: { Authorization: apiKey },
       body,
+      signal: AbortSignal.timeout(8000),
     });
     const result = await res.json();
     if (!result.status) {

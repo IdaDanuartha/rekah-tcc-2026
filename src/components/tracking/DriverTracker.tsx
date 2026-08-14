@@ -257,24 +257,30 @@ export default function DriverTracker({
   async function submitProof() {
     setSubmitError(null);
     setSubmitting(true);
-    const fd = new FormData();
-    if (photo) fd.append("photo", photo);
-    const g = geo ?? pos ?? (await getFreshPos());
-    if (g) {
-      fd.append("lat", String(g.lat));
-      fd.append("lng", String(g.lng));
-    }
-    if (nfc.trim()) fd.append("nfc", nfc.trim());
+    try {
+      const fd = new FormData();
+      if (photo) fd.append("photo", photo);
+      const g = geo ?? pos ?? (await getFreshPos());
+      if (g) {
+        fd.append("lat", String(g.lat));
+        fd.append("lng", String(g.lng));
+      }
+      if (nfc.trim()) fd.append("nfc", nfc.trim());
 
-    const res = await submitDeliveryProof(scheduleId, fd);
-    setSubmitting(false);
-    if (res.ok) {
-      stop();
-      stopDemo();
-      setProofOpen(false);
-      router.refresh(); // halaman → state "Dropping selesai"
-    } else {
-      setSubmitError(res.error);
+      const res = await submitDeliveryProof(scheduleId, fd);
+      if (res.ok) {
+        stop();
+        stopDemo();
+        setProofOpen(false);
+        router.refresh(); // halaman → state "Dropping selesai"
+      } else {
+        setSubmitError(res.error);
+      }
+    } catch (err) {
+      // Server action throw (mis. env/koneksi) — tanpa ini tombol nyangkut "Mengunggah…".
+      setSubmitError(err instanceof Error ? err.message : "Gagal mengunggah. Coba lagi.");
+    } finally {
+      setSubmitting(false);
     }
   }
 
