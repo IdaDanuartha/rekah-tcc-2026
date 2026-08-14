@@ -36,6 +36,7 @@ export default function DriverTracker({
   const [nfc, setNfc] = useState("");
   const [nfcScanning, setNfcScanning] = useState(false);
   const [nfcTapped, setNfcTapped] = useState(false);
+  const [nfcManual, setNfcManual] = useState(false);
   const [nfcError, setNfcError] = useState<string | null>(null);
   const nfcAbort = useRef<AbortController | null>(null);
   const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(null);
@@ -215,6 +216,7 @@ export default function DriverTracker({
         if (value) {
           setNfc(value);
           setNfcTapped(true);
+          setNfcManual(false); // tap = kode disembunyikan
         }
         setNfcScanning(false);
         ctrl.abort();
@@ -447,16 +449,33 @@ export default function DriverTracker({
                 )}
               </button>
               {nfcError && <p className="text-xs text-[var(--color-siaga)] mt-1.5">{nfcError}</p>}
-              <input
-                type="text"
-                value={nfc}
-                onChange={(e) => {
-                  setNfc(e.target.value);
+
+              {/* Kode UID hanya tampil di mode manual; hasil tap disembunyikan. */}
+              {nfcManual && (
+                <input
+                  type="text"
+                  value={nfc}
+                  onChange={(e) => {
+                    setNfc(e.target.value);
+                    setNfcTapped(false);
+                  }}
+                  placeholder="ketik UID: NFC-TITIK-01"
+                  autoFocus
+                  className="w-full mt-2 px-3 py-2.5 bg-[var(--color-kertas)] border border-[var(--color-kapur-dalam)] rounded-md text-sm text-[var(--color-tanah-pecah)] placeholder:text-[var(--color-lempung)] focus:outline-none focus:border-[var(--color-air-jernih)] focus:ring-2 focus:ring-[var(--color-air-jernih)]/20 transition-all"
+                />
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setNfcManual((m) => !m);
+                  setNfc("");
                   setNfcTapped(false);
                 }}
-                placeholder="atau ketik manual: NFC-TITIK-01"
-                className="w-full mt-2 px-3 py-2.5 bg-[var(--color-kertas)] border border-[var(--color-kapur-dalam)] rounded-md text-sm text-[var(--color-tanah-pecah)] placeholder:text-[var(--color-lempung)] focus:outline-none focus:border-[var(--color-air-jernih)] focus:ring-2 focus:ring-[var(--color-air-jernih)]/20 transition-all"
-              />
+                className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-[var(--color-lempung)] hover:text-[var(--color-air-jernih)] transition-colors"
+              >
+                {nfcManual ? "Pakai tap NFC" : "Ketik UID manual"}
+              </button>
             </div>
 
             {submitError && <p className="text-xs text-[var(--color-genting)]">{submitError}</p>}
