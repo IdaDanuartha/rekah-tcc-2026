@@ -341,7 +341,7 @@ export interface ScheduleListItem {
   status: DropStatus;
   created_at: string;
   villages: VillageBrief | null;
-  delivery_proofs: { verified_at: string; photo_url: string | null }[] | null;
+  delivery_proofs: { verified_at: string; photo_url: string | null; nfc_tag_id: string | null }[] | null;
 }
 
 export async function listSchedules(filter?: { villageId?: string }): Promise<ScheduleListItem[]> {
@@ -349,7 +349,7 @@ export async function listSchedules(filter?: { villageId?: string }): Promise<Sc
   let query = supabase
     .from("drop_schedules")
     .select(
-      "id, fleet, date, status, created_at, villages(id, name, district, regency, bpbd_category), delivery_proofs(verified_at, photo_url)"
+      "id, fleet, date, status, created_at, villages(id, name, district, regency, bpbd_category), delivery_proofs(verified_at, photo_url, nfc_tag_id)"
     )
     .order("date", { ascending: false });
   if (filter?.villageId) query = query.eq("village_id", filter.villageId);

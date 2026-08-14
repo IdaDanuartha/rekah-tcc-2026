@@ -153,6 +153,11 @@ export default async function VillageDetailPage({ params }: PageProps<"/dashboar
                       <div className="mono-label normal-case tracking-normal mt-0.5">
                         {new Date(s.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                       </div>
+                      {s.delivery_proofs?.[0]?.nfc_tag_id && (
+                        <div className="mono-label normal-case tracking-normal mt-0.5 text-[var(--color-air-jernih)]">
+                          NFC {s.delivery_proofs[0].nfc_tag_id}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <span className={`mono-label !text-[0.625rem] px-2 py-1 rounded-full border ${isDone ? "text-[var(--color-hijau-tuntas)] border-[#86C7A2] bg-[var(--color-hijau-muda)]" : "text-[var(--color-air-jernih)] border-[#9ECADC] bg-[var(--color-air-muda)]"}`}>

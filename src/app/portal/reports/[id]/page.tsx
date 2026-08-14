@@ -40,7 +40,7 @@ interface ScheduleRow {
   fleet: string;
   date: string;
   status: DropStatus;
-  delivery_proofs: { verified_at: string; photo_url: string | null }[] | null;
+  delivery_proofs: { verified_at: string; photo_url: string | null; nfc_tag_id: string | null }[] | null;
 }
 
 const dropStatusLabel: Record<DropStatus, string> = {
@@ -88,7 +88,7 @@ export default async function PortalLaporanDetail({
   if (report.village_id) {
     const { data: js } = await supabase
       .from("drop_schedules")
-      .select("id, fleet, date, status, delivery_proofs(verified_at, photo_url)")
+      .select("id, fleet, date, status, delivery_proofs(verified_at, photo_url, nfc_tag_id)")
       .eq("village_id", report.village_id)
       .order("date", { ascending: false });
     const rows = (js as unknown as ScheduleRow[]) ?? [];
@@ -233,12 +233,21 @@ export default async function PortalLaporanDetail({
             </div>
 
             {proof && (
-              <div className="mt-4 pt-4 border-t border-[var(--color-kapur-dalam)] flex items-center gap-2 text-sm text-[var(--color-hijau-tuntas)]">
-                <Camera size={15} />
-                Bukti serah terima terekam ·{" "}
-                <span className="mono-label normal-case tracking-normal">
-                  {new Date(proof.verified_at).toLocaleString("id-ID")}
-                </span>
+              <div className="mt-4 pt-4 border-t border-[var(--color-kapur-dalam)] space-y-1.5">
+                <div className="flex items-center gap-2 text-sm text-[var(--color-hijau-tuntas)]">
+                  <Camera size={15} />
+                  Bukti serah terima terekam ·{" "}
+                  <span className="mono-label normal-case tracking-normal">
+                    {new Date(proof.verified_at).toLocaleString("id-ID")}
+                  </span>
+                </div>
+                {proof.nfc_tag_id && (
+                  <div className="flex items-center gap-2 text-xs text-[var(--color-lempung)]">
+                    <ShieldCheck size={13} className="text-[var(--color-air-jernih)]" />
+                    Titik terverifikasi NFC ·{" "}
+                    <span className="font-mono text-[var(--color-tanah-pecah)]">{proof.nfc_tag_id}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>

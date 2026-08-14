@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   Smartphone,
   TriangleAlert,
+  Nfc,
 } from "lucide-react";
 
 type NavItemData = {
@@ -50,6 +51,7 @@ function buildNavSections(pendingCount: number): NavSection[] {
         { href: "/dashboard/early-warning", label: "Peringatan Dini", icon: TriangleAlert },
         { href: "/dashboard/villages", label: "Data Desa", icon: MapPin },
         { href: "/dashboard/schedule", label: "Jadwal Dropping", icon: Truck },
+        { href: "/dashboard/nfc", label: "Stiker NFC", icon: Nfc },
       ],
     },
     {

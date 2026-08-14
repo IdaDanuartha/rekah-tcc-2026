@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { updateScheduleStatus } from "@/lib/dashboard-actions";
+import { validateNfcForVillage } from "@/lib/nfc-actions";
 
 export type ProofResult = { ok: true } | { ok: false; error: string };
 
@@ -25,10 +26,15 @@ export async function submitDeliveryProof(
 
   const { data: sched } = await supabase
     .from("drop_schedules")
-    .select("id")
+    .select("id, village_id")
     .eq("id", scheduleId)
     .maybeSingle();
   if (!sched) return { ok: false, error: "Jadwal tidak ditemukan." };
+
+  // Validasi tag NFC: wajib terdaftar & cocok dgn desa tujuan jadwal.
+  if (!nfc) return { ok: false, error: "Tag NFC wajib. Tap stiker titik dropping atau ketik UID." };
+  const nfcCheck = await validateNfcForVillage(nfc, (sched as { village_id: string }).village_id);
+  if (!nfcCheck.ok) return { ok: false, error: nfcCheck.error };
 
   let photo_url: string | null = null;
   if (file instanceof File && file.size > 0) {
@@ -50,7 +56,7 @@ export async function submitDeliveryProof(
     photo_url,
     geotag_lat: Number.isFinite(lat) ? lat : null,
     geotag_lng: Number.isFinite(lng) ? lng : null,
-    nfc_tag_id: nfc,
+    nfc_tag_id: nfcCheck.uid,
   });
   if (insErr) return { ok: false, error: insErr.message };
 

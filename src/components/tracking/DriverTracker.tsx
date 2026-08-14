@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, Navigation, Loader2, TriangleAlert, Truck, PlayCircle, Square, Camera, CheckCircle2, X } from "lucide-react";
+import { MapPin, Navigation, Loader2, TriangleAlert, Truck, PlayCircle, Square, Camera, CheckCircle2, X, Nfc } from "lucide-react";
 import LiveTrackMap from "./LiveTrackMap";
 import { fetchRoadRoute, sampleCoords } from "@/lib/route-client";
 import { submitDeliveryProof } from "@/lib/tracking-actions";
@@ -34,6 +34,10 @@ export default function DriverTracker({
   const [photo, setPhoto] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [nfc, setNfc] = useState("");
+  const [nfcScanning, setNfcScanning] = useState(false);
+  const [nfcTapped, setNfcTapped] = useState(false);
+  const [nfcError, setNfcError] = useState<string | null>(null);
+  const nfcAbort = useRef<AbortController | null>(null);
   const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -123,6 +127,7 @@ export default function DriverTracker({
     return () => {
       if (watchId.current != null) navigator.geolocation.clearWatch(watchId.current);
       if (demoTimer.current) clearInterval(demoTimer.current);
+      nfcAbort.current?.abort();
     };
   }, []);
 
@@ -175,10 +180,71 @@ export default function DriverTracker({
     });
   }
 
+  async function scanNfc() {
+    setNfcError(null);
+    if (typeof window === "undefined" || !("NDEFReader" in window)) {
+      setNfcError("Perangkat/browser ini tidak mendukung tap NFC (butuh Chrome di Android). Ketik kode manual.");
+      return;
+    }
+    try {
+      // batalkan sesi scan sebelumnya bila ada
+      nfcAbort.current?.abort();
+      const ctrl = new AbortController();
+      nfcAbort.current = ctrl;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const reader = new (window as any).NDEFReader();
+      setNfcScanning(true);
+      await reader.scan({ signal: ctrl.signal });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      reader.onreading = (e: any) => {
+        // UID (serial number) = identitas kanonik stiker yg dipakai saat register.
+        let value: string = e.serialNumber || "";
+        // fallback ke payload teks/URL bila serial number tak terbaca
+        if (!value) {
+          for (const rec of e.message.records) {
+            if (rec.recordType === "text") {
+              value = new TextDecoder(rec.encoding || "utf-8").decode(rec.data);
+              break;
+            }
+            if (rec.recordType === "url") {
+              value = new TextDecoder().decode(rec.data);
+              break;
+            }
+          }
+        }
+        if (value) {
+          setNfc(value);
+          setNfcTapped(true);
+        }
+        setNfcScanning(false);
+        ctrl.abort();
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      reader.onreadingerror = () => {
+        setNfcError("Gagal membaca tag. Dekatkan HP ke tag lalu coba lagi.");
+        setNfcScanning(false);
+      };
+    } catch (err) {
+      setNfcScanning(false);
+      const name = err instanceof DOMException ? err.name : "";
+      setNfcError(
+        name === "NotAllowedError"
+          ? "Izin NFC ditolak. Aktifkan NFC di HP lalu izinkan."
+          : "Gagal memulai pemindaian NFC. Pastikan NFC aktif.",
+      );
+    }
+  }
+
   async function openProof() {
     setSubmitError(null);
     setProofOpen(true);
     setGeo(pos ?? (await getFreshPos()));
+  }
+
+  function closeProof() {
+    nfcAbort.current?.abort();
+    setNfcScanning(false);
+    setProofOpen(false);
   }
 
   function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
@@ -311,13 +377,13 @@ export default function DriverTracker({
       {/* Modal bukti serah terima */}
       {proofOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3">
-          <div className="absolute inset-0 bg-[var(--color-tanah-pecah)]/50" onClick={() => !submitting && setProofOpen(false)} />
+          <div className="absolute inset-0 bg-[var(--color-tanah-pecah)]/50" onClick={() => !submitting && closeProof()} />
           <div className="relative card rounded-xl shadow-[var(--shadow-float)] w-full max-w-md p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-[var(--color-tanah-pecah)]" style={{ fontFamily: "var(--font-heading)" }}>
                 Bukti Serah Terima
               </h3>
-              <button onClick={() => !submitting && setProofOpen(false)} className="p-1 text-[var(--color-lempung)] hover:text-[var(--color-tanah-pecah)]">
+              <button onClick={() => !submitting && closeProof()} className="p-1 text-[var(--color-lempung)] hover:text-[var(--color-tanah-pecah)]">
                 <X size={18} />
               </button>
             </div>
@@ -353,15 +419,37 @@ export default function DriverTracker({
               )}
             </div>
 
-            {/* NFC opsional */}
+            {/* NFC — tap tag titik dropping untuk menyelesaikan */}
             <div>
-              <label className="mono-label block mb-1.5">Tag NFC (opsional)</label>
+              <label className="mono-label block mb-1.5">Tag NFC titik dropping</label>
+              <button
+                type="button"
+                onClick={scanNfc}
+                disabled={nfcScanning}
+                className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold border transition-colors disabled:opacity-70 ${
+                  nfcTapped
+                    ? "bg-[var(--color-hijau-tuntas)]/10 border-[var(--color-hijau-tuntas)] text-[var(--color-hijau-tuntas)]"
+                    : "bg-[var(--color-kertas)] border-[var(--color-kapur-dalam)] text-[var(--color-tanah-pecah)] hover:border-[var(--color-air-jernih)] hover:text-[var(--color-air-jernih)]"
+                }`}
+              >
+                {nfcScanning ? (
+                  <><Loader2 size={16} className="animate-spin" /> Dekatkan HP ke tag…</>
+                ) : nfcTapped ? (
+                  <><CheckCircle2 size={16} /> Tag terbaca</>
+                ) : (
+                  <><Nfc size={16} /> Tap tag NFC</>
+                )}
+              </button>
+              {nfcError && <p className="text-xs text-[var(--color-siaga)] mt-1.5">{nfcError}</p>}
               <input
                 type="text"
                 value={nfc}
-                onChange={(e) => setNfc(e.target.value)}
-                placeholder="cth: NFC-TITIK-01"
-                className="w-full px-3 py-2.5 bg-[var(--color-kertas)] border border-[var(--color-kapur-dalam)] rounded-md text-sm text-[var(--color-tanah-pecah)] placeholder:text-[var(--color-lempung)] focus:outline-none focus:border-[var(--color-air-jernih)] focus:ring-2 focus:ring-[var(--color-air-jernih)]/20 transition-all"
+                onChange={(e) => {
+                  setNfc(e.target.value);
+                  setNfcTapped(false);
+                }}
+                placeholder="atau ketik manual: NFC-TITIK-01"
+                className="w-full mt-2 px-3 py-2.5 bg-[var(--color-kertas)] border border-[var(--color-kapur-dalam)] rounded-md text-sm text-[var(--color-tanah-pecah)] placeholder:text-[var(--color-lempung)] focus:outline-none focus:border-[var(--color-air-jernih)] focus:ring-2 focus:ring-[var(--color-air-jernih)]/20 transition-all"
               />
             </div>
 
@@ -370,14 +458,14 @@ export default function DriverTracker({
             <div className="flex items-center gap-2 pt-1">
               <button
                 onClick={submitProof}
-                disabled={submitting || !photo}
+                disabled={submitting || !photo || !nfc.trim()}
                 className="flex-1 inline-flex items-center justify-center gap-2 bg-[var(--color-hijau-tuntas)] !text-white text-sm font-semibold py-3 rounded-md hover:bg-[#345B48] disabled:opacity-50 transition-colors"
               >
                 {submitting ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
                 {submitting ? "Mengunggah…" : "Kirim & Selesaikan"}
               </button>
               <button
-                onClick={() => setProofOpen(false)}
+                onClick={closeProof}
                 disabled={submitting}
                 className="px-4 py-3 text-sm font-medium text-[var(--color-lempung)] hover:text-[var(--color-tanah-pecah)] disabled:opacity-50 transition-colors"
               >
@@ -385,7 +473,7 @@ export default function DriverTracker({
               </button>
             </div>
             <p className="mono-label normal-case tracking-normal !text-[0.625rem] text-center">
-              Foto wajib. Bukti disimpan sebagai serah terima resmi lalu dropping ditandai selesai.
+              Foto &amp; tag NFC wajib. Bukti disimpan sebagai serah terima resmi lalu dropping ditandai selesai.
             </p>
           </div>
         </div>
